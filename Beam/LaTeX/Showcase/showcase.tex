@@ -50,8 +50,8 @@
 
 \def\Arsh{\mathop{\mathrm{Arsh}}}
 
-\title{Решение задач теории упругости проекционно-сеточными методами}
-\author{Студент: Касьянова К.\,А., ФН2-51Б\\ \vspace*{5mm}
+\title{Метод конечных элементов в задаче моделирования прогиба балки}
+\author{Студент: Касьянова К.\,А., ФН2-61Б\\ \vspace*{5mm}
 Научный руководитель: к.ф-м.н., доцент кафедры ФН-2 Марчевский~И.\,К.}
 \date{\today}
 \titlegraphic{\includegraphics[width=2cm]{emblema}}
@@ -111,30 +111,28 @@
 	При решении задачи на прогиб двухузловой элемент имеет вид:
 	\begin{figure}[h]
 		\centering
-		\includegraphics[width=0.75\textwidth]{element}
+		\includegraphics[width=0.55\textwidth]{element}
 		\label{fig:element}
 	\end{figure}
 		
 	\begin{block}{Рассмотрим выражение для функции формы и его производной для элемента:}
-		\[u_e(z)=N_{1e}u_{1}+N_{2e}\frac{du_{1}}{dz}+N_{3e}u_{2}+N_{4e}\frac{du_{2}}{dz},\]
-		\[\frac{du_e}{dz}=\frac{dN_{1e}}{dz}u_{1}+\frac{dN_{2e}}{dz}\frac{du_{1}}{dz}+\frac{dN_{3e}}{dz}u_{2}+\frac{dN_{4e}}{dz}\frac{du_{2}}{dz}.\]
+		\[u_e(z)=N_{1e}u|_i + N_{2e}\frac{du}{dz}\Bigr|_i+N_{3e}u|_{i+1} + N_{4e}\frac{du}{dz}\Bigr|_{i+1},\]
+		\[\frac{du_e}{dz}=\frac{dN_{1e}}{dz}u|_i+\frac{dN_{2e}}{dz}\frac{du}{dz}\Bigr|_i+\frac{dN_{3e}}{dz}u|_{i+1}+\frac{dN_{4e}}{dz}\frac{du}{dz}\Bigr|_{i+1}.\]
 	\end{block}
 \end{frame}
 
 \begin{frame}{}
 	Из условий:
-	\begin{block}{}
-		\[u_e(0)=u_{1}, u^{'}(0)=u^{'}_{1}, u(L_e)=u_{2}, u^{'}(L_e)=u^{'}_{2},\] 
-	\end{block}
+		\[u_e(0)=u|_i, u_e^{'}(0)=u^{'}|_{i}, u_{e}(L_e)=u|_{i+1}, u_{e}^{'}(L_e)=u^{'}|_{i+1},\] 
 	получаем функции формы $N_{1e},N_{2e},N_{3e},N_{4e}$:
 	\begin{block}{} 
 		\begin{equation}
 			\label{beam1}
-			N_{1e}(z)=1-\frac{3z^{2}}{L_e^{2}}+\frac{2z^{3}}{L_e^{3}},~~ N_{2e}(z)=z-\frac{2z^{2}}{L_e}+\frac{z^{3}}{L_e^{2}},
+			N_{1e}(z)=\frac{(L_e-z)^2(L_e+2z)}{L_e^3},~~ N_{2e}(z)=\frac{z(L_e-z)^{2}}{L_e^{2}},
 		\end{equation}
 		\begin{equation}
 			\label{beam2}
-			N_{3e}(z)=\frac{3z^{2}}{L_e^{2}}-\frac{2z^{3}}{L_e^{3}},~~N_{4e}(z)=-\frac{z^{2}}{L_e}+\frac{z^{3}}{L_e^{2}}.
+			N_{3e}(z)=\frac{z^{2}(3L_e-2z)}{L_e^3},~~N_{4e}(z)=\frac{z^2(z-L_e)}{L_e^{2}}.
 		\end{equation}
 	\end{block}
 
@@ -168,41 +166,18 @@
 			}
 		\]
 	\end{block}
-\end{frame}
+	Выражения для пробных функций $w_e$ запишем аналогично.
 
-\begin{frame}
-	В качестве пробных функций будем использовать функции, представимые в том же виде:
-	\begin{block}{}
-				\[w_e(z)=\textbf{N}_e \textbf{w}_{e}=
-				\left[
-				\begin{array}{cccc}
-					N_{1e}(z) & N_{2e}(z) & N_{3e}(z) & N_{4e}(z)
-				\end{array}
-				\right]
-				\Scale[0.7]{
-					\left\{
-					\begin{array}{ccc}
-						w_{1}   \\
-						w^{'}_{1}  \\
-							w_{2}\\
-							w^{'}_{2}\\
-					\end{array}
-					\right\}
-				}
-			\]	
-	\end{block}
 	Дважды продифференцировав выражения $u_e$ и $w_e$, получим:
-	\begin{block}{}
 		\[
 			\frac{d^{2}u_e}{dz^{2}}=\frac{d^{2}}{dz^{2}}\textbf{N}_e \textbf{u}_e=\textbf{B}_e \textbf{u}_e ~~~~~\frac{d^{2}w_e}{dz^{2}}=\frac{d^{2}}{dz^{2}}\textbf{N}_e \textbf{w}_e=\textbf{B}_e \textbf{w}_e
 		\]
-	\end{block}
 	Тогда можно ввести следующее обозначение для вторых производных:
 	\[\textbf{B}_e=\frac{d^{2}}{dz^{2}}\textbf{N}_e=\]
 	\begin{equation*}
 		\Scale[0.8] {
 			=\begin{bmatrix}
-				\displaystyle-\frac{6}{L_e^{2}}+\frac{12z}{L_e^{3}} &  \displaystyle-\frac{4}{L_e}+\frac{6z}{L_e^{2}} &   \displaystyle\frac{6}{L_e^{2}}-\frac{12z}{L_e^{3}} &  \displaystyle-\frac{2}{L_e}+\frac{6z}{L_e^{2}}
+			\displaystyle-\frac{6}{L_e^{2}}+\frac{12z}{L_e^{3}} &  \displaystyle-\frac{4}{L_e}+\frac{6z}{L_e^{2}} &   \displaystyle\frac{6}{L_e^{2}}-\frac{12z}{L_e^{3}} &  \displaystyle-\frac{2}{L_e}+\frac{6z}{L_e^{2}}
 			\end{bmatrix}.
 		}
 	\end{equation*}
@@ -276,8 +251,8 @@
 					\[
 						\Scale[0.65]{
 							\begin{split}
-								N_{1e}(z)&=\frac{\left(L_e+6 z\right) \left(-3 z L_e+L_e^2+2 z^2\right){}^2}{L_e^5}, \\
-								N_{2e}(z)&=\frac{z \left(-3 z L_e+L_e^2+2 z^2\right){}^2}{L_e^4}, \\
+								N_{1e}(z)&=\frac{4}{L_{e}^{5}}\left(z-\frac{L_{e}}{2}\right)^{2}(z-L_{e})^{2}(L_e+6 z) \\
+								N_{2e}(z)&=\frac{z (L_{e}-2 z)^2 (L_{e}-z)^2}{L^4}, \\
 								N_{3e}(z)&=\frac{16 z^2 \left(z-L_e\right){}^2}{L_e^4},\\							
 							\end{split}
 						}
@@ -328,16 +303,16 @@
 	\end{figure}
 Граничные условия:
 \begin{enumerate} 
-	\item $y^{'}|_{z=0}=-\frac{\pi}{180}$ -- поворот в т.$A$ на $1^{\circ};$\\
 	\item $y|_{z=0}=0$ -- отсутствие перемещения в т.$A$;\\
-	\item $y^{'}|_{z=L}=0$ -- отсутствие поворота сечения в т.$B$;\\
-	\item $y|_{z=L}=0$ -- отсутствие перемещения в т.$B$.\\
+	\item $y^{'}|_{z=0}=-\frac{\pi}{180}$ -- поворот в т.$A$ на $1^{\circ};$\\
+	\item $y|_{z=L}=0$ -- отсутствие перемещения в т.$B$;\\ 
+	\item $y^{'}|_{z=L}=0$ -- отсутствие поворота сечения в т.$B$.\\
 \end{enumerate}
 \end{frame}
 
 \begin{frame}{Гладкая функция внешней нагрузки:}
 	\begin{block}{Гладкая функция внешней нагрузки:}
-		\[q=\frac{Q}{L} \sin(\pi z).\]
+		\[q=-\frac{Q}{L} \sin(\pi z).\]
 	\end{block}
 
 	\begin{figure}[H]
@@ -400,7 +375,7 @@
 
 
 \begin{frame}{}
-	Непрерывная негладкая функция внешней нагрузки с разрывом в узле:
+	Непрерывная негладкая функция внешней нагрузки с "изломом" в узле:
 	\begin{equation}
 		q = 
 			\begin{cases}
@@ -443,7 +418,7 @@
 						\begin{array}{|c|c|c|c|c|c|}
 								\hline
 								\text{N} & 2 & 4 & 8 & 16 & 32 \\ \hline
-								\Delta  & 7.2 \cdot 10^{-5} & 3.67 \cdot 10^{-6} & 2.2 \cdot 10^{-7} & 1.35 \cdot 10^{-8} & 8.44 \cdot 10^{-10}\\ \hline
+								\Delta  & 7.21 \cdot 10^{-5} & 3.67 \cdot 10^{-6} & 2.21 \cdot 10^{-7} & 1.35 \cdot 10^{-8} & 8.44 \cdot 10^{-10}\\ \hline
 								m  &  & 4.31 & 4.06 & 4.02 & 4.01 \\ 
 								\hline
 						\end{array}
@@ -456,7 +431,7 @@
 					\begin{array}{|c|c|c|c|c|c|}
 						\hline
 						\text{N} & 2 & 4 & 8 & 16 & 32\\ \hline
-						\Delta  & 8.16 \cdot 10^{-7} & 9.8 \cdot 10^{-9} & 1.45 \cdot 10^{-10} & 1.737 \cdot 10^{-12} & 9.82 \cdot 10^{-14}\\ \hline
+						\Delta  & 8.16 \cdot 10^{-7} & 9.82 \cdot 10^{-9} & 1.45 \cdot 10^{-10} & 1.74 \cdot 10^{-12} & 9.82 \cdot 10^{-14}\\ \hline
 						m &  & 6.38 & 6.08 & 6.38 & 4.14 \\ 
 						\hline
 					\end{array}
@@ -469,7 +444,7 @@
 
 
 \begin{frame}{}
-	Непрерывная негладкая функция внешней нагрузки с разрывом не в узле, т.е.
+	Непрерывная негладкая функция внешней нагрузки с "изломом" не в узле, т.е.
 	$z_{0}=\frac{3L}{7}.$ 
 	
 	
@@ -498,8 +473,8 @@
 						\begin{array}{|c|c|c|c|c|c|}
 								\hline
 								\text{N} & 2 & 4 & 8 & 16 & 32 \\ \hline
-								\Delta  & 5.7 \cdot 10^-7 & 3.1 \cdot 10^{-6} & 2.08 \cdot 10^{-7} & 1.3 \cdot 10^{-8} & 8.1 \cdot 10^{-10}\\ \hline
-								m  &  &4.25 & 3.85 & 3.9 & 4.01 \\ 
+								\Delta  & 5.7 \cdot 10^-7 & 3.11 \cdot 10^{-6} & 2.08 \cdot 10^{-7} & 1.32 \cdot 10^{-8} & 8.11 \cdot 10^{-10}\\ \hline
+								m  &  &4.25 & 3.85 & 3.90 & 4.01 \\ 
 								\hline
 								\end{array}
 				}
@@ -511,7 +486,7 @@
 			\begin{array}{|c|c|c|c|c|c|}
 			\hline
 			\text{N} & 2 & 4 & 8 & 16 & 32 \\ \hline
-			\Delta  & 8.55 \cdot 10^{-7} & 1.31 \cdot 10^{-8} & 3.7 \cdot 10^{-10} & 1.94 \cdot 10^{-12} & 1.18 \cdot 10^{-13}  \\ \hline
+			\Delta  & 8.55 \cdot 10^{-7} & 1.31 \cdot 10^{-8} & 3.70 \cdot 10^{-10} & 1.94 \cdot 10^{-12} & 1.18 \cdot 10^{-13}  \\ \hline
 			m  & & 6.03 & 5.15 & 7.57 & 4.03 \text{} \\ 
 			\hline
 			\end{array}
@@ -523,12 +498,12 @@
 
 
 \begin{frame}
-	\begin{block}{Ограниченная функция внешней нагрузки с разрывом в узле}
+	\begin{block}{Ограниченная функция внешней нагрузки с "изломом" в узле}
 		\begin{equation}
 			\Scale[0.7]{q = 
 			\begin{cases}
-				Q \sin \left(\frac{\pi  z}{z_{0}}\right) & z \leq \frac{8 z_{0}}{10} \\,
-				Q \sin \left(\frac{\pi  (z-z_{0})}{z_{0}}\right) & z > \frac{8 z_{0}}{10} ,
+				Q \sin \left(\frac{\pi  z}{z_{0}}\right) & z \leq  z_{0}, \\
+				Q \sin \left(\frac{\pi  (z-z_{0})}{z_{0}}\right) & z > z_{0},
 			\end{cases}
 			}
 		\end{equation}
@@ -560,7 +535,7 @@
 							\begin{array}{|c|c|c|c|c|c|}
 									\hline
 									\text{N} & 2 & 4 & 8 & 16 & 32 \\ \hline
-			\Delta  & 7.1 \cdot 10^{-5} & 3.3 \cdot 10^{-6} & 2.2 \cdot 10^{-7} & 1.3 \cdot 10^{-8} & 8.4 \cdot 10^{-10}\\ \hline
+			\Delta  & 7.11 \cdot 10^{-5} & 3.32 \cdot 10^{-6} & 2.20 \cdot 10^{-7} & 1.32 \cdot 10^{-8} & 8.42 \cdot 10^{-10}\\ \hline
 			m  &  & 4.41 & 3.94 & 4.06 & 3.95 \\ 
 									\hline
 									\end{array}
@@ -573,7 +548,7 @@
 				\begin{array}{|c|c|c|c|c|c|}
 				\hline
 				\text{N} & 2 & 4 & 8 & 16 & 32 \\ \hline
-			\Delta  & 1.04 \cdot 10^{-6} & 1.55 \cdot 10^{-8} & 4.9 \cdot 10^{-10} & 1.689 \cdot 10^{-11} & 3.9 \cdot 10^{-13} \\ \hline
+			\Delta  & 1.04 \cdot 10^{-6} & 1.55 \cdot 10^{-8} & 4.92 \cdot 10^{-10} & 1.69 \cdot 10^{-11} & 3.92 \cdot 10^{-13} \\ \hline
 			m  &  & 6.07 & 4.96 & 4.88 & 5.43 \\ 
 				\hline
 				\end{array}
@@ -587,7 +562,7 @@
 
 
 	\begin{frame}{}
-		Ограниченная функция внешней нагрузки с разрывом не узле
+		Ограниченная функция внешней нагрузки с "изломом" не узле
 			\begin{columns}
 				\begin{column}{0.57\textwidth}
 					\begin{figure}[H]
@@ -613,7 +588,7 @@
 								\begin{array}{|c|c|c|c|c|c|}
 									\hline
 									\text{N} & 2 & 4 & 8 & 16 & 32 \\ \hline
-									\Delta  & 5.2 \cdot 10^{-5} & 2.5 \cdot 10^{-6} & 1.9 \cdot 10^{-7} & 1.23 \cdot 10^{-8} & 8.12 \cdot 10^{-10} \\ \hline
+									\Delta  & 5.21 \cdot 10^{-5} & 2.50 \cdot 10^{-6} & 1.92 \cdot 10^{-7} & 1.23 \cdot 10^{-8} & 8.12 \cdot 10^{-10} \\ \hline
 									m  &  & 4.38 & 3.64 & 4.01 & 3.92 \\ 
 									\hline
 										\end{array}
@@ -668,8 +643,8 @@
 						\begin{array}{|c|c|c|c|c|c|}
 							\hline
 							\text{N} & 2 & 4 & 8 & 16 & 32\\ \hline
-				\Delta  &3.9 \cdot 10^{-4} & 6.7 \cdot 10^{-5} & 6.1 \cdot 10^{-6} & 9.53 \cdot 10^{-8} & 1.65 \cdot 10^{-8} \\ \hline
-				m  &  & 2.52 & 3.47 & 6 & 2.52 \\ 
+				\Delta  &3.91 \cdot 10^{-4} & 6.72 \cdot 10^{-5} & 6.11 \cdot 10^{-6} & 9.53 \cdot 10^{-8} & 1.65 \cdot 10^{-8} \\ \hline
+				m  &  & 2.52 & 3.47 & 6.00 & 2.52 \\ 
 							\hline
 								\end{array}
 				}
@@ -681,7 +656,7 @@
 			\begin{array}{|c|c|c|c|c|c|}
 			\hline
 			\text{N} & 2 & 4 & 8 & 16 & 32\\ \hline
-				\Delta  & 4.5 \cdot 10^{-5} & 1.86 \cdot 10^{-6} & 2.64 \cdot 10^{-7} & 1.12 \cdot 10^{-8} & 4.54 \cdot 10^{-10} \\ \hline
+				\Delta  & 4.52 \cdot 10^{-5} & 1.86 \cdot 10^{-6} & 2.64 \cdot 10^{-7} & 1.12 \cdot 10^{-8} & 4.54 \cdot 10^{-10} \\ \hline
 				m  &  &  4.62 & 2.82 & 4.56 & 4.62 \\ 
 			\hline
 			\end{array}
